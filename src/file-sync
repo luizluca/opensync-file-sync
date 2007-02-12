@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <config>
-  <!-- directory path for file-sync -->
-  <path></path>
-
-  <!-- should care of subdirectories (TRUE or FALSE) -->
-  <recursive>FALSE</recursive>
+  <directory>
+    <path></path>
+    <objtype>data</objtype>
+  </directory>
 </config>
