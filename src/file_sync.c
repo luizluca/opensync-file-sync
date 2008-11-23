@@ -566,7 +566,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		g_free(path_field);
 	
 		if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
-			osync_error_set(error, OSYNC_ERROR_GENERIC, "%s is not a directory", dir->path);
+			osync_error_set(error, OSYNC_ERROR_GENERIC, "\"%s\" is not a directory", dir->path);
 			goto error_free_env;
 		}
 	}
