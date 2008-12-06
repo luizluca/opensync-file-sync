@@ -60,6 +60,23 @@ static void osync_filesync_connect(void *data, OSyncPluginInfo *info, OSyncConte
 	OSyncError *error = NULL;
 	
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, ctx);
+
+	OSyncObjTypeSink *sink = osync_plugin_info_get_sink(info);
+	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+
+	char *anchorpath = g_strdup_printf("%s/anchor.db", osync_plugin_info_get_configdir(info));
+	char *path_field = g_strdup_printf("path_%s", osync_objtype_sink_get_name(dir->sink));
+
+	if (!osync_anchor_compare(anchorpath, path_field, dir->path))
+		osync_objtype_sink_set_slowsync(dir->sink, TRUE);
+
+	g_free(anchorpath);
+	g_free(path_field);
+	
+	if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
+		osync_error_set(&error, OSYNC_ERROR_GENERIC, "\"%s\" is not a directory", dir->path);
+		goto error;
+	}
 	
 	osync_context_report_success(ctx);
 	
@@ -71,16 +88,6 @@ error:
 	osync_trace(TRACE_EXIT_ERROR, "%s: %s", __func__, osync_error_print(&error));
 	osync_error_unref(&error);
 }
-
-static void osync_filesync_disconnect(void *data, OSyncPluginInfo *info, OSyncContext *ctx)
-{
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, ctx);
-	
-	osync_context_report_success(ctx);
-	
-	osync_trace(TRACE_EXIT, "%s", __func__);
-}
-
 
 //typedef void (* OSyncSinkWriteFn) 
 //typedef void (* OSyncSinkCommittedAllFn) (void *data, OSyncPluginInfo *info, OSyncContext *ctx);
@@ -564,6 +571,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		/* All sinks have the same functions of course */
 		OSyncObjTypeSinkFunctions functions;
 		memset(&functions, 0, sizeof(functions));
+		functions.connect = osync_filesync_connect;
 		functions.get_changes = osync_filesync_get_changes;
 		functions.commit = osync_filesync_commit_change;
 		functions.read = osync_filesync_read;
@@ -584,18 +592,6 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 
 		if (!osync_hashtable_load(dir->hashtable, error))
 			goto error_free_env;
-
-		char *anchorpath = g_strdup_printf("%s/anchor.db", osync_plugin_info_get_configdir(info));
-		char *path_field = g_strdup_printf("path_%s", osync_objtype_sink_get_name(dir->sink));
-		if (!osync_anchor_compare(anchorpath, path_field, dir->path))
-			osync_objtype_sink_set_slowsync(dir->sink, TRUE);
-		g_free(anchorpath);
-		g_free(path_field);
-	
-		if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
-			osync_error_set(error, OSYNC_ERROR_GENERIC, "\"%s\" is not a directory", dir->path);
-			goto error_free_env;
-		}
 	}
 
 	if (pathes) {
