@@ -544,7 +544,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		const char *objtype = osync_objtype_sink_get_name(dir->sink);
 		OSyncPluginResource *res = osync_plugin_config_find_active_resource(config, objtype);
 		dir->path = osync_plugin_resource_get_path(res);
-		if (!dir->path) {
+		if ((!dir->path) || (!strlen(dir->path))) {
 			osync_error_set(error, OSYNC_ERROR_MISCONFIGURATION, "Path for object type \"%s\" is not configured.", objtype);
 			goto error_free_env;
 		}
