@@ -63,16 +63,15 @@ static void osync_filesync_connect(void *data, OSyncPluginInfo *info, OSyncConte
 
 	OSyncObjTypeSink *sink = osync_plugin_info_get_sink(info);
 	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
+	osync_bool anchormatch;
 
-	char *anchorpath = g_strdup_printf("%s/anchor.db", osync_plugin_info_get_configdir(info));
-	char *path_field = g_strdup_printf("path_%s", osync_objtype_sink_get_name(dir->sink));
+	if (!osync_anchor_compare(anchor, dir->path, &anchormatch, &error))
+		goto error;
 
-	if (!osync_anchor_compare(anchorpath, path_field, dir->path))
+	if (!anchormatch)
 		osync_objtype_sink_set_slowsync(dir->sink, TRUE);
 
-	g_free(anchorpath);
-	g_free(path_field);
-	
 	if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
 		osync_error_set(&error, OSYNC_ERROR_GENERIC, "\"%s\" is not a directory", dir->path);
 		goto error;
@@ -495,12 +494,10 @@ static void osync_filesync_sync_done(void *data, OSyncPluginInfo *info, OSyncCon
 
 	OSyncObjTypeSink *sink = osync_plugin_info_get_sink(info);
 	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
 
-	char *anchorpath = g_strdup_printf("%s/anchor.db", osync_plugin_info_get_configdir(info));
-	char *path_field = g_strdup_printf("path_%s", osync_objtype_sink_get_name(sink));
-	osync_anchor_update(anchorpath, path_field, dir->path);
-	g_free(anchorpath);
-	g_free(path_field);
+	if (!osync_anchor_update(anchor, dir->path, &error))
+		goto error;
 
 	if (!osync_hashtable_save(dir->hashtable, &error))
 		goto error;
@@ -581,6 +578,10 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		/* We pass the OSyncFileDir object to the sink, so we dont have to look it up
 		 * again once the functions are called */
 		osync_objtype_sink_set_functions(dir->sink, functions, dir);
+
+
+		/* Request an anchor from the framework. */
+		osync_objtype_sink_enable_anchor(dir->sink, TRUE); 
 
 		osync_trace(TRACE_INTERNAL, "The configdir: %s", osync_plugin_info_get_configdir(info));
 		char *tablepath = g_strdup_printf("%s/hashtable.db", osync_plugin_info_get_configdir(info));
