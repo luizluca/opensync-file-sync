@@ -352,7 +352,7 @@ static void osync_filesync_report_dir(OSyncFileDir *directory, OSyncPluginInfo *
 			file->size = size;
 			file->path = g_strdup(relative_filename);
 			
-		        OSyncObjFormat *fileformat = osync_format_env_find_objformat(formatenv, "file");
+			OSyncObjFormat *fileformat = osync_format_env_find_objformat(formatenv, "file");
 
 			odata = osync_data_new((char *)file, sizeof(OSyncFileFormat), fileformat, &error);
 			if (!odata) {
@@ -422,7 +422,7 @@ static void osync_filesync_get_changes(void *data, OSyncPluginInfo *info, OSyncC
 		osync_change_set_uid(change, uid);
 		osync_change_set_changetype(change, OSYNC_CHANGE_TYPE_DELETED);
 		
-	        OSyncObjFormat *fileformat = osync_format_env_find_objformat(formatenv, "file");
+		OSyncObjFormat *fileformat = osync_format_env_find_objformat(formatenv, "file");
 
 		OSyncData *odata = osync_data_new(NULL, 0, fileformat, &error);
 		if (!odata) {
@@ -619,7 +619,7 @@ static void osync_filesync_finalize(void *data)
 
 /* Here we actually tell opensync which sinks are available. For this plugin, we
  * just report all objtype as available. Since the resource are configured like this. */
-static osync_bool osync_filesync_discover(void *data, OSyncPluginInfo *info, OSyncError **error)
+static osync_bool osync_filesync_discover(OSyncPluginInfo *info, void *data, OSyncError **error)
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, error);
 	
