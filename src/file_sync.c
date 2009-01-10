@@ -178,13 +178,12 @@ static osync_bool osync_filesync_write(void *data, OSyncPluginInfo *info, OSyncC
 	unsigned int size = 0;
 	
 	char *filename = NULL, *tmp = NULL;
-	if (!(tmp = strdup(osync_change_get_uid(change)))) {
-		osync_trace(TRACE_EXIT_ERROR, "%s", __func__);
-		return;
-	}
+	if (!(tmp = strdup(osync_change_get_uid(change))))
+		goto error;
+
 	filename_scape_characters(tmp);
 
-	filename = g_strdup_printf ("%s/%s", dir->path, tmp);
+	filename = g_strdup_printf ("%s%c%s", dir->path, G_DIR_SEPARATOR, tmp);
 	free(tmp);
 
 	switch (osync_change_get_changetype(change)) {
