@@ -22,7 +22,6 @@
 #include <glib.h>
 
 #include <opensync/opensync.h>
-#include <opensync/opensync-serializer.h>
 #include <opensync/opensync-format.h>
 
 #include "file.h"
