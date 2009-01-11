@@ -20,7 +20,7 @@
 
 #include "file_sync.h"
 #include "filename_scape.h"
-#include <opensync/file.h>
+#include "file.h"
 #include <opensync/opensync-version.h>
 #include <assert.h>
 #include <stdlib.h>
