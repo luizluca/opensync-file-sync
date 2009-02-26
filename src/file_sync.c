@@ -55,13 +55,13 @@ static char *osync_filesync_generate_hash(struct stat *buf)
 	return hash;
 }
 
-static void osync_filesync_connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *data)
+static void osync_filesync_connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *userdata)
 {
 	OSyncError *error = NULL;
 	
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, ctx);
+	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p)", __func__, sink, info, ctx, userdata);
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
 	osync_bool anchormatch;
 
@@ -95,7 +95,7 @@ static osync_bool osync_filesync_read(OSyncObjTypeSink *sink, OSyncPluginInfo *i
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink , info, ctx, change, userdata);
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	OSyncFormatEnv *formatenv = osync_plugin_info_get_format_env(info);
 	OSyncError *error = NULL;
 	
@@ -166,11 +166,11 @@ error:
 	return FALSE;
 }
 
-static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *data)
+static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata)
 {
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink, info, ctx, change, data);
+	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink, info, ctx, change, userdata);
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	OSyncError *error = NULL;
 	OSyncData *odata = NULL;
 	char *buffer = NULL;
@@ -196,7 +196,7 @@ static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *
 			if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
 				const char *newid = g_strdup_printf ("%s-new", osync_change_get_uid(change));
 				osync_change_set_uid(change, newid);
-				osync_filesync_write(sink, info, ctx, change, data);
+				osync_filesync_write(sink, info, ctx, change, userdata);
 				//osync_error_set(&error, OSYNC_ERROR_EXISTS, "Entry already exists : %s", filename);
 				//goto error;
 			}
@@ -384,11 +384,11 @@ static void osync_filesync_report_dir(OSyncFileDir *directory, OSyncPluginInfo *
 	osync_trace(TRACE_EXIT, "%s", __func__);
 }
 
-static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, osync_bool slow_sync, void *data)
+static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, osync_bool slow_sync, void *userdata)
 {
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %i, %p)", __func__, sink, info, ctx, slow_sync, data);
+	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %i, %p)", __func__, sink, info, ctx, slow_sync, userdata);
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	OSyncFormatEnv *formatenv = osync_plugin_info_get_format_env(info);
 	OSyncError *error = NULL;
 	
@@ -446,15 +446,15 @@ static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *
 	osync_trace(TRACE_EXIT, "%s", __func__);
 }
 
-static void osync_filesync_commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *data)
+static void osync_filesync_commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata)
 {
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink, info, ctx, change, data);
+	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink, info, ctx, change, userdata);
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	
 	char *filename = NULL, *tmp;
 	
-	if (!osync_filesync_write(sink, info, ctx, change, data)) {
+	if (!osync_filesync_write(sink, info, ctx, change, userdata)) {
 		osync_trace(TRACE_EXIT_ERROR, "%s", __func__);
 		return;
 	}
@@ -484,13 +484,13 @@ static void osync_filesync_commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo
 	osync_trace(TRACE_EXIT, "%s", __func__);
 }
 
-static void osync_filesync_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *data)
+static void osync_filesync_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *userdata)
 {
-	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p)", __func__, sink, info, ctx, data);
+	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p)", __func__, sink, info, ctx, userdata);
 
 	OSyncError *error = NULL;
 
-	OSyncFileDir *dir = osync_objtype_sink_get_userdata(sink);
+	OSyncFileDir *dir = userdata;
 	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
 
 	if (!osync_anchor_update(anchor, dir->path, &error))
@@ -532,6 +532,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		if (!dir)
 			goto error_free_env;
 
+		dir->env = env;
 		dir->sink = osync_plugin_info_nth_objtype(info, i);
 		assert(dir->sink);
 
