@@ -22,6 +22,7 @@
 #include <glib.h>
 
 #include <opensync/opensync.h>
+#include <opensync/opensync-common.h>
 #include <opensync/opensync-format.h>
 
 #include "file.h"
@@ -157,7 +158,7 @@ static char *print_file(const char *data, unsigned int size, void *user_data)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)data;
 	
-	char *printable = g_strdup_printf ("File %s: size: %i", file->path, file->size);
+	char *printable = osync_strdup_printf ("File %s: size: %i", file->path, file->size);
 	return printable;
 }
 
