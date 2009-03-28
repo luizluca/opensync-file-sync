@@ -526,7 +526,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 
 
 	GList *pathes = NULL;
-	sinks = osync_plugin_info_get_objtypes(info);
+	sinks = osync_plugin_info_get_objtype_sinks(info);
 	for (s = sinks; s; s = s->next) {
 		OSyncFileDir *dir = osync_try_malloc0(sizeof(OSyncFileDir), error);
 		if (!dir)
@@ -617,7 +617,7 @@ static osync_bool osync_filesync_discover(OSyncPluginInfo *info, void *data, OSy
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, error);
 	
-	OSyncList *s, *sinks = osync_plugin_info_get_objtypes(info);
+	OSyncList *s, *sinks = osync_plugin_info_get_objtype_sinks(info);
 	for (s = sinks; s; s = s->next) {
 		OSyncObjTypeSink *sink = (OSyncObjTypeSink *) s->data;
 		g_assert(sink);
