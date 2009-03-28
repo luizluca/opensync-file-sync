@@ -513,6 +513,8 @@ error:
  * all _possible_ objtype sinks. */
 static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *info, OSyncError **error)
 {
+	OSyncList *s , *sinks = NULL;
+
 	osync_trace(TRACE_ENTRY, "%s(%p, %p)", __func__, info, error);
 
 	OSyncFileEnv *env = osync_try_malloc0(sizeof(OSyncFileEnv), error);
@@ -524,14 +526,14 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 
 
 	GList *pathes = NULL;
-	int i, numobjs = osync_plugin_info_num_objtypes(info);
-	for (i = 0; i < numobjs; i++) {
+	sinks = osync_plugin_info_get_objtypes(info);
+	for (s = sinks; s; s = s->next) {
 		OSyncFileDir *dir = osync_try_malloc0(sizeof(OSyncFileDir), error);
 		if (!dir)
 			goto error_free_env;
 
 		dir->env = env;
-		dir->sink = osync_plugin_info_nth_objtype(info, i);
+		dir->sink = (OSyncObjTypeSink *) s->data;
 		assert(dir->sink);
 
 		const char *objtype = osync_objtype_sink_get_name(dir->sink);
@@ -582,6 +584,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		/* Request an hashtable from the framework. */
 		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
 	}
+	osync_list_free(sinks);
 
 	if (pathes) {
 		g_list_foreach(pathes, (GFunc)g_free, NULL);
@@ -594,6 +597,9 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 error_free_env:
 	free_env(env);
 error:
+	if (sinks)
+		osync_list_free(sinks);
+
 	osync_trace(TRACE_EXIT_ERROR, "%s: %s", __func__, osync_error_print(error));
 	return NULL;
 }
@@ -611,13 +617,14 @@ static osync_bool osync_filesync_discover(OSyncPluginInfo *info, void *data, OSy
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, error);
 	
-	int i, numobjs = osync_plugin_info_num_objtypes(info);
-	for (i = 0; i < numobjs; i++) {
-		OSyncObjTypeSink *sink = osync_plugin_info_nth_objtype(info, i);
+	OSyncList *s, *sinks = osync_plugin_info_get_objtypes(info);
+	for (s = sinks; s; s = s->next) {
+		OSyncObjTypeSink *sink = (OSyncObjTypeSink *) s->data;
 		g_assert(sink);
 
 		osync_objtype_sink_set_available(sink, TRUE);
 	}
+	osync_list_free(sinks);
 	
 	OSyncVersion *version = osync_version_new(error);
 	osync_version_set_plugin(version, "file-sync");
