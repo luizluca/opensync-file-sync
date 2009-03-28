@@ -25,7 +25,6 @@
 
 #include <opensync/opensync-format.h>
 #include <opensync/opensync-plugin.h>
-#include <opensync/opensync-context.h>
 #include <opensync/opensync-data.h>
 #include <opensync/opensync-helper.h>
 
