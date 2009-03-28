@@ -45,7 +45,6 @@ typedef struct OSyncFileDir {
 	OSyncObjFormat *objformat_output;
 	const char *path;
 	GDir *dir;
-	OSyncHashTable *hashtable;
 	OSyncObjTypeSink *sink;
 	osync_bool recursive;
 	OSyncFileEnv *env;

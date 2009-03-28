@@ -30,9 +30,6 @@ static void free_dir(OSyncFileDir *dir)
 	if (dir->sink)
 		osync_objtype_sink_unref(dir->sink);
 
-	if (dir->hashtable)
-		osync_hashtable_unref(dir->hashtable);
-
 	g_free(dir);
 }
 
@@ -260,6 +257,7 @@ static void osync_filesync_report_dir(OSyncFileDir *directory, OSyncPluginInfo *
 	osync_trace(TRACE_ENTRY, "%s(%p, %s, %p)", __func__, directory, subdir, ctx);
 
 	OSyncFormatEnv *formatenv = osync_plugin_info_get_format_env(info);
+	OSyncHashTable *hashtable = osync_objtype_sink_get_hashtable(directory->sink); 
 
 	path = g_build_filename(directory->path, subdir, NULL);
 	osync_trace(TRACE_INTERNAL, "path %s", path);
@@ -310,10 +308,10 @@ static void osync_filesync_report_dir(OSyncFileDir *directory, OSyncPluginInfo *
 			osync_change_set_hash(change, hash);
 			g_free(hash);
 
-			OSyncChangeType type = osync_hashtable_get_changetype(directory->hashtable, change);
+			OSyncChangeType type = osync_hashtable_get_changetype(hashtable, change);
 			osync_change_set_changetype(change, type);
 
-			osync_hashtable_update_change(directory->hashtable, change);
+			osync_hashtable_update_change(hashtable, change);
 
 			if (type == OSYNC_CHANGE_TYPE_UNMODIFIED) {
 				g_free(filename);
@@ -390,11 +388,13 @@ static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *
 
 	OSyncFileDir *dir = userdata;
 	OSyncFormatEnv *formatenv = osync_plugin_info_get_format_env(info);
+	OSyncHashTable *hashtable = osync_objtype_sink_get_hashtable(sink); 
+
 	OSyncError *error = NULL;
 	
 	if (slow_sync) {
 		osync_trace(TRACE_INTERNAL, "Slow sync requested");
-		if (!osync_hashtable_slowsync(dir->hashtable, &error))
+		if (!osync_hashtable_slowsync(hashtable, &error))
 		{
 			osync_context_report_osyncerror(ctx, error);
 			osync_trace(TRACE_EXIT_ERROR, "%s - %s", __func__, osync_error_print(&error));
@@ -407,7 +407,7 @@ static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *
 
 	osync_filesync_report_dir(dir, info, NULL, ctx);
 	
-	OSyncList *u, *uids = osync_hashtable_get_deleted(dir->hashtable);
+	OSyncList *u, *uids = osync_hashtable_get_deleted(hashtable);
 	for (u = uids; u; u = u->next) {
 		OSyncChange *change = osync_change_new(&error);
 		if (!change) {
@@ -436,7 +436,7 @@ static void osync_filesync_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *
 		
 		osync_context_report_change(ctx, change);
 		
-		osync_hashtable_update_change(dir->hashtable, change);
+		osync_hashtable_update_change(hashtable, change);
 	
 		osync_change_unref(change);
 	}
@@ -451,6 +451,7 @@ static void osync_filesync_commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink, info, ctx, change, userdata);
 
 	OSyncFileDir *dir = userdata;
+	OSyncHashTable *hashtable = osync_objtype_sink_get_hashtable(sink); 
 	
 	char *filename = NULL, *tmp;
 	
@@ -476,7 +477,7 @@ static void osync_filesync_commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo
 	}
 	g_free(filename);
 
-	osync_hashtable_update_change(dir->hashtable, change);
+	osync_hashtable_update_change(hashtable, change);
 	g_free(hash);
 	
 	osync_context_report_success(ctx);
@@ -496,9 +497,6 @@ static void osync_filesync_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *in
 	if (!osync_anchor_update(anchor, dir->path, &error))
 		goto error;
 
-	if (!osync_hashtable_save(dir->hashtable, &error))
-		goto error;
-	
 	osync_context_report_success(ctx);
 	
 	osync_trace(TRACE_EXIT, "%s", __func__);
@@ -581,16 +579,8 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		/* Request an anchor from the framework. */
 		osync_objtype_sink_enable_anchor(dir->sink, TRUE); 
 
-		osync_trace(TRACE_INTERNAL, "The configdir: %s", osync_plugin_info_get_configdir(info));
-		char *tablepath = g_strdup_printf("%s/hashtable.db", osync_plugin_info_get_configdir(info));
-		dir->hashtable = osync_hashtable_new(tablepath, objtype, error);
-		g_free(tablepath);
-	
-		if (!dir->hashtable)
-			goto error_free_env;
-
-		if (!osync_hashtable_load(dir->hashtable, error))
-			goto error_free_env;
+		/* Request an hashtable from the framework. */
+		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
 	}
 
 	if (pathes) {
