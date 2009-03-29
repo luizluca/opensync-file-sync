@@ -568,7 +568,6 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		osync_objtype_sink_set_get_changes_func(dir->sink, osync_filesync_get_changes);
 		osync_objtype_sink_set_commit_func(dir->sink, osync_filesync_commit_change);
 		osync_objtype_sink_set_read_func(dir->sink, osync_filesync_read);
-		osync_objtype_sink_set_write_func(dir->sink, osync_filesync_write);
 		osync_objtype_sink_set_sync_done_func(dir->sink, osync_filesync_sync_done);
 		
 		/* We pass the OSyncFileDir object to the sink, so we dont have to look it up
