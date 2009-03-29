@@ -564,19 +564,16 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		}
 
 		/* All sinks have the same functions of course */
-		OSyncObjTypeSinkFunctions functions;
-		memset(&functions, 0, sizeof(functions));
-		functions.connect = osync_filesync_connect;
-		functions.get_changes = osync_filesync_get_changes;
-		functions.commit = osync_filesync_commit_change;
-		functions.read = osync_filesync_read;
-		functions.write = osync_filesync_write;
-		functions.sync_done = osync_filesync_sync_done;
+		osync_objtype_sink_set_connect_func(dir->sink, osync_filesync_connect);
+		osync_objtype_sink_set_get_changes_func(dir->sink, osync_filesync_get_changes);
+		osync_objtype_sink_set_commit_func(dir->sink, osync_filesync_commit_change);
+		osync_objtype_sink_set_read_func(dir->sink, osync_filesync_read);
+		osync_objtype_sink_set_write_func(dir->sink, osync_filesync_write);
+		osync_objtype_sink_set_sync_done_func(dir->sink, osync_filesync_sync_done);
 		
 		/* We pass the OSyncFileDir object to the sink, so we dont have to look it up
 		 * again once the functions are called */
-		osync_objtype_sink_set_functions(dir->sink, functions, dir);
-
+		osync_objtype_sink_set_userdata(dir->sink, dir);
 
 		/* Request an anchor from the framework. */
 		osync_objtype_sink_enable_anchor(dir->sink, TRUE); 
