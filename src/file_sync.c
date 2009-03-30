@@ -66,7 +66,7 @@ static void osync_filesync_connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info
 		goto error;
 
 	if (!anchormatch)
-		osync_objtype_sink_set_slowsync(dir->sink, TRUE);
+		osync_context_report_slowsync(ctx);
 
 	if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
 		osync_error_set(&error, OSYNC_ERROR_GENERIC, "\"%s\" is not a directory", dir->path);
