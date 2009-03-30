@@ -62,7 +62,7 @@ static void osync_filesync_connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info
 	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
 	osync_bool anchormatch;
 
-	if (!osync_anchor_compare(anchor, dir->path, &anchormatch, &error))
+	if (!osync_anchor_compare(anchor, "path", dir->path, &anchormatch, &error))
 		goto error;
 
 	if (!anchormatch)
@@ -494,7 +494,7 @@ static void osync_filesync_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *in
 	OSyncFileDir *dir = userdata;
 	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
 
-	if (!osync_anchor_update(anchor, dir->path, &error))
+	if (!osync_anchor_update(anchor, "path", dir->path, &error))
 		goto error;
 
 	osync_context_report_success(ctx);
