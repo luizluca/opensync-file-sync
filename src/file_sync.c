@@ -59,13 +59,13 @@ static void osync_filesync_connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p)", __func__, sink, info, ctx, userdata);
 
 	OSyncFileDir *dir = userdata;
-	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
-	osync_bool anchormatch;
+	OSyncSinkStateDB *state_db = osync_objtype_sink_get_state_db(sink); 
+	osync_bool pathmatch;
 
-	if (!osync_anchor_compare(anchor, "path", dir->path, &anchormatch, &error))
+	if (!osync_sink_state_equal(state_db, "path", dir->path, &pathmatch, &error))
 		goto error;
 
-	if (!anchormatch)
+	if (!pathmatch)
 		osync_context_report_slowsync(ctx);
 
 	if (!g_file_test(dir->path, G_FILE_TEST_IS_DIR)) {
@@ -492,9 +492,9 @@ static void osync_filesync_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *in
 	OSyncError *error = NULL;
 
 	OSyncFileDir *dir = userdata;
-	OSyncAnchor *anchor = osync_objtype_sink_get_anchor(sink); 
+	OSyncSinkStateDB *state_db = osync_objtype_sink_get_state_db(sink); 
 
-	if (!osync_anchor_update(anchor, "path", dir->path, &error))
+	if (!osync_sink_state_set(state_db, "path", dir->path, &error))
 		goto error;
 
 	osync_context_report_success(ctx);
@@ -574,8 +574,8 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		 * again once the functions are called */
 		osync_objtype_sink_set_userdata(dir->sink, dir);
 
-		/* Request an anchor from the framework. */
-		osync_objtype_sink_enable_anchor(dir->sink, TRUE); 
+		/* Request a state database from the framework. */
+		osync_objtype_sink_enable_state_db(dir->sink, TRUE); 
 
 		/* Request an hashtable from the framework. */
 		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
