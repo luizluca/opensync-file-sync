@@ -88,7 +88,7 @@ error:
 //typedef void (* OSyncSinkCommittedAllFn) (void *data, OSyncPluginInfo *info, OSyncContext *ctx);
 
 
-static osync_bool osync_filesync_read(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata)
+static void osync_filesync_read(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata)
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p, %p)", __func__, sink , info, ctx, change, userdata);
 
@@ -151,7 +151,7 @@ static osync_bool osync_filesync_read(OSyncObjTypeSink *sink, OSyncPluginInfo *i
 	g_free(filename);
 	
 	osync_trace(TRACE_EXIT, "%s", __func__);
-	return TRUE;
+	return;
 
 error_free_data:
 	g_free(data);
@@ -160,7 +160,7 @@ error:
 	osync_context_report_osyncerror(ctx, error);
 	osync_trace(TRACE_EXIT_ERROR, "%s: %s", __func__, osync_error_print(&error));
 	osync_error_unref(&error);
-	return FALSE;
+	return;
 }
 
 static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata)
