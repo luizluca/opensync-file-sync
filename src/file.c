@@ -240,14 +240,14 @@ osync_bool get_conversion_info(OSyncFormatEnv *env, OSyncError **error)
 	if (!conv)
 		return FALSE;
 	
-	osync_format_env_register_converter(env, conv);
+	osync_format_env_register_converter(env, conv, error);
 	osync_converter_unref(conv);
 	
 	conv = osync_converter_new(OSYNC_CONVERTER_ENCAP, plain, file, conv_plain_to_file, error);
 	if (!conv)
 		return FALSE;
 	
-	osync_format_env_register_converter(env, conv);
+	osync_format_env_register_converter(env, conv, error);
 	osync_converter_unref(conv);
 	return TRUE;
 }
