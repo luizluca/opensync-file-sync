@@ -24,7 +24,7 @@
 #include <opensync/opensync.h>
 #include <opensync/opensync-format.h>
 
-static OSyncConvCmpResult compare_plain(const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data)
+static OSyncConvCmpResult compare_plain(const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data, OSyncError **error)
 {
 	/* Consider empty block equal NULL pointers */
 	if (!leftsize) leftdata = NULL;
@@ -53,9 +53,11 @@ static osync_bool copy_plain(const char *input, unsigned int inpsize, char **out
 	return TRUE;
 }
 
-static void destroy_plain(char *input, unsigned int inpsize, void *user_data)
+static osync_bool destroy_plain(char *input, unsigned int inpsize, void *user_data, OSyncError **error)
 {
 	g_free(input);
+
+	return TRUE;
 }
 
 osync_bool get_format_info(OSyncFormatEnv *env, OSyncError **error)

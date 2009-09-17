@@ -27,7 +27,7 @@
 
 #include "file.h"
 
-static OSyncConvCmpResult compare_file(const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data)
+static OSyncConvCmpResult compare_file(const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *leftfile = (OSyncFileFormat *)leftdata;
 	OSyncFileFormat *rightfile = (OSyncFileFormat *)rightdata;
@@ -101,7 +101,7 @@ error:
 	return FALSE;
 }
 
-static void destroy_file(char *input, unsigned int inpsize, void *user_data)
+static osync_bool destroy_file(char *input, unsigned int inpsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 	
@@ -112,6 +112,8 @@ static void destroy_file(char *input, unsigned int inpsize, void *user_data)
 		g_free(file->path);
 	
 	g_free(file);
+
+	return TRUE;
 }
 
 static osync_bool duplicate_file(const char *uid, const char *input, unsigned int insize, char **newuid, char **output, unsigned int *outsize, osync_bool *dirty, void *user_data, OSyncError **error)
@@ -160,7 +162,7 @@ static time_t revision_file(const char *input, unsigned int inpsize, void *user_
 	return lastmod;
 }
 
-static char *print_file(const char *data, unsigned int size, void *user_data)
+static char *print_file(const char *data, unsigned int size, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)data;
 	
