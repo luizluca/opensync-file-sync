@@ -62,28 +62,35 @@ osync_bool get_format_info(OSyncFormatEnv *env, OSyncError **error)
 {
 	OSyncObjFormat *format = osync_objformat_new("plain", "data", error);
 	if (!format)
-		return FALSE;
+		goto error;
 	
 	osync_objformat_set_compare_func(format, compare_plain);
 	osync_objformat_set_copy_func(format, copy_plain);
 	osync_objformat_set_destroy_func(format, destroy_plain);
 
-	osync_format_env_register_objformat(env, format);
+	if (!osync_format_env_register_objformat(env, format, error))
+		goto error;
+
 	osync_objformat_unref(format);
 
 	/* "memo" is the same as "plain" expect the object type is fixed to "note" */
 	format = osync_objformat_new("memo", "note", error);
 	if (!format)
-		return FALSE;
+		goto error;
 	
 	osync_objformat_set_compare_func(format, compare_plain);
 	osync_objformat_set_copy_func(format, copy_plain);
 	osync_objformat_set_destroy_func(format, destroy_plain);
 
-	osync_format_env_register_objformat(env, format);
+	if (!osync_format_env_register_objformat(env, format, error))
+		goto error;
+
 	osync_objformat_unref(format);
 
 	return TRUE;
+
+error:
+	return FALSE;
 }
 
 int get_version(void)

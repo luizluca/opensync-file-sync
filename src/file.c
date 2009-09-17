@@ -202,7 +202,7 @@ osync_bool get_format_info(OSyncFormatEnv *env, OSyncError **error)
 {
 	OSyncObjFormat *format = osync_objformat_new("file", "data", error);
 	if (!format)
-		return FALSE;
+		goto error;
 	
 	osync_objformat_set_compare_func(format, compare_file);
 	osync_objformat_set_destroy_func(format, destroy_file);
@@ -214,9 +214,14 @@ osync_bool get_format_info(OSyncFormatEnv *env, OSyncError **error)
 	osync_objformat_set_marshal_func(format, marshal_file);
 	osync_objformat_set_demarshal_func(format, demarshal_file);
 	
-	osync_format_env_register_objformat(env, format);
+	if (!osync_format_env_register_objformat(env, format, error))
+		goto error;
+
 	osync_objformat_unref(format);
 	return TRUE;
+
+error:
+	return FALSE;
 }
 
 osync_bool get_conversion_info(OSyncFormatEnv *env, OSyncError **error)
