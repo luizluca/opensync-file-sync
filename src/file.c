@@ -27,7 +27,7 @@
 
 #include "file.h"
 
-static OSyncConvCmpResult compare_file(const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data, OSyncError **error)
+static OSyncConvCmpResult compare_file(OSyncObjFormat *format, const char *leftdata, unsigned int leftsize, const char *rightdata, unsigned int rightsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *leftfile = (OSyncFileFormat *)leftdata;
 	OSyncFileFormat *rightfile = (OSyncFileFormat *)rightdata;
@@ -58,7 +58,7 @@ static OSyncConvCmpResult compare_file(const char *leftdata, unsigned int leftsi
 	return OSYNC_CONV_DATA_MISMATCH;
 }
 
-static osync_bool conv_file_to_plain(char *input, unsigned int inpsize, char **output, unsigned int *outpsize, osync_bool *free_input, const char *config, void *user_data, OSyncError **error)
+static osync_bool conv_file_to_plain(OSyncFormatConverter *conv, char *input, unsigned int inpsize, char **output, unsigned int *outpsize, osync_bool *free_input, const char *config, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 	char *plaindata = NULL;
@@ -76,7 +76,7 @@ static osync_bool conv_file_to_plain(char *input, unsigned int inpsize, char **o
 	return TRUE;
 }
 
-static osync_bool conv_plain_to_file(char *input, unsigned int inpsize, char **output, unsigned int *outpsize, osync_bool *free_input, const char *config, void *userdata, OSyncError **error)
+static osync_bool conv_plain_to_file(OSyncFormatConverter *conv, char *input, unsigned int inpsize, char **output, unsigned int *outpsize, osync_bool *free_input, const char *config, void *userdata, OSyncError **error)
 {
 	OSyncFileFormat *file = NULL;
 	osync_trace(TRACE_INTERNAL, "Converting plain to file");
@@ -101,7 +101,7 @@ error:
 	return FALSE;
 }
 
-static osync_bool destroy_file(char *input, unsigned int inpsize, void *user_data, OSyncError **error)
+static osync_bool destroy_file(OSyncObjFormat *format, char *input, unsigned int inpsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 
@@ -116,7 +116,7 @@ static osync_bool destroy_file(char *input, unsigned int inpsize, void *user_dat
 	return TRUE;
 }
 
-static osync_bool duplicate_file(const char *uid, const char *input, unsigned int insize, char **newuid, char **output, unsigned int *outsize, osync_bool *dirty, void *user_data, OSyncError **error)
+static osync_bool duplicate_file(OSyncObjFormat *format, const char *uid, const char *input, unsigned int insize, char **newuid, char **output, unsigned int *outsize, osync_bool *dirty, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 
@@ -128,7 +128,7 @@ static osync_bool duplicate_file(const char *uid, const char *input, unsigned in
 	return TRUE;
 }
 
-static osync_bool copy_file(const char *input, unsigned int inpsize, char **output, unsigned int *outpsize, void *user_data, OSyncError **error)
+static osync_bool copy_file(OSyncObjFormat *format, const char *input, unsigned int inpsize, char **output, unsigned int *outpsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *inpfile = (OSyncFileFormat *)input;
 
@@ -149,7 +149,7 @@ static osync_bool copy_file(const char *input, unsigned int inpsize, char **outp
 	return TRUE;
 }
 
-static time_t revision_file(const char *input, unsigned int inpsize, void *user_data, OSyncError **error)
+static time_t revision_file(OSyncObjFormat *format, const char *input, unsigned int inpsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 	time_t lastmod;
@@ -162,7 +162,7 @@ static time_t revision_file(const char *input, unsigned int inpsize, void *user_
 	return lastmod;
 }
 
-static char *print_file(const char *data, unsigned int size, void *user_data, OSyncError **error)
+static char *print_file(OSyncObjFormat *format, const char *data, unsigned int size, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)data;
 
@@ -170,7 +170,7 @@ static char *print_file(const char *data, unsigned int size, void *user_data, OS
 	return printable;
 }
 
-static osync_bool marshal_file(const char *input, unsigned int inpsize, OSyncMarshal *marshal, void *user_data, OSyncError **error)
+static osync_bool marshal_file(OSyncObjFormat *format, const char *input, unsigned int inpsize, OSyncMarshal *marshal, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = (OSyncFileFormat *)input;
 	osync_trace(TRACE_ENTRY, "%s(%p, %i, %p, %p)", __func__, input, inpsize, marshal, error);
@@ -190,7 +190,7 @@ error:
 
 }
 
-static osync_bool demarshal_file(OSyncMarshal *marshal, char **output, unsigned int *outpsize, void *user_data, OSyncError **error)
+static osync_bool demarshal_file(OSyncObjFormat *format, OSyncMarshal *marshal, char **output, unsigned int *outpsize, void *user_data, OSyncError **error)
 {
 	OSyncFileFormat *file = NULL;
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p, %p)", __func__, marshal, output, outpsize, error);
