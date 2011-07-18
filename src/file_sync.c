@@ -581,7 +581,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
 
  		/* Save dir inside env in order to free it in finalize */
-		env->directories = g_list_append(env->directories, dir);(env->directories, dir);
+		env->directories = g_list_append(env->directories, dir);
 	}
 	osync_list_free(sinks);
 
