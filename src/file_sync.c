@@ -535,6 +535,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		dir->env = env;
 		dir->sink = (OSyncObjTypeSink *) s->data;
 		assert(dir->sink);
+		osync_objtype_sink_ref(dir->sink);
 
 		const char *objtype = osync_objtype_sink_get_name(dir->sink);
 		OSyncPluginResource *res = osync_plugin_config_find_active_resource(config, objtype);
