@@ -602,6 +602,10 @@ error_free_env:
 error:
 	if (sinks)
 		osync_list_free(sinks);
+	if (pathes) {
+		g_list_foreach(pathes, (GFunc)g_free, NULL);
+		g_list_free(pathes);
+	}
 
 	osync_trace(TRACE_EXIT_ERROR, "%s: %s", __func__, osync_error_print(error));
 	return NULL;
