@@ -556,8 +556,8 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		}
 		pathes = g_list_append(pathes, g_strdup(dir->path));
 
-		OSyncList *s = osync_plugin_resource_get_objformat_sinks(res);
-		for (; s; s = s->next) {
+		OSyncList *s = NULL, *osinks = osync_plugin_resource_get_objformat_sinks(res);
+		for (s = osinks; s; s = s->next) {
 			OSyncObjFormatSink *fsink = s->data;
 			const char *objformat = osync_objformat_sink_get_objformat(fsink);
 			assert(objformat);
@@ -569,6 +569,7 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 			}
 
 		}
+		osync_list_free(osinks);
 
 		/* All sinks have the same functions of course */
 		osync_objtype_sink_set_connect_func(dir->sink, osync_filesync_connect);
