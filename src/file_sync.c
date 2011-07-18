@@ -589,6 +589,9 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 
 		/* Request an hashtable from the framework. */
 		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
+
+		/* Save dir inside env in order to free it in finalize */
+		env->directories = osync_list_append(env->directories, dir);
 	}
 	osync_list_free(sinks);
 
