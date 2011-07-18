@@ -86,7 +86,7 @@ static osync_bool conv_plain_to_file(char *input, unsigned int inpsize, char **o
 	if (!file)
 		goto error;
 
-	file->path = osync_rand_str(g_random_int_range(1, 100), error);
+	file->path = osync_rand_str(100, error);
 	if (!file->path)
 		goto error;
 
