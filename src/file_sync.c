@@ -532,6 +532,12 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 		if (!dir)
 			goto error_free_env;
 
+		/* Save dir inside env in order to free it in finalize
+		 * Do this first, so that error_free_env will free even
+		 * this partial dir.
+		 */
+		env->directories = g_list_append(env->directories, dir);
+
 		dir->env = env;
 		dir->sink = (OSyncObjTypeSink *) s->data;
 		assert(dir->sink);
@@ -580,9 +586,6 @@ static void *osync_filesync_initialize(OSyncPlugin *plugin, OSyncPluginInfo *inf
 
 		/* Request an hashtable from the framework. */
 		osync_objtype_sink_enable_hashtable(dir->sink, TRUE);
-
- 		/* Save dir inside env in order to free it in finalize */
-		env->directories = g_list_append(env->directories, dir);
 	}
 	osync_list_free(sinks);
 
