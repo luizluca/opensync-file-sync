@@ -191,8 +191,9 @@ static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *
 			break;
 		case OSYNC_CHANGE_TYPE_ADDED:
 			if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
-				const char *newid = g_strdup_printf ("%s-new", osync_change_get_uid(change));
+				char *newid = g_strdup_printf ("%s-new", osync_change_get_uid(change));
 				osync_change_set_uid(change, newid);
+				g_free(newid);
 				osync_filesync_write(sink, info, ctx, change, userdata);
 				//osync_error_set(&error, OSYNC_ERROR_EXISTS, "Entry already exists : %s", filename);
 				//goto error;
