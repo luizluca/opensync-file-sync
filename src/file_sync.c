@@ -229,7 +229,8 @@ static osync_bool osync_filesync_write(OSyncObjTypeSink *sink, OSyncPluginInfo *
 	return TRUE;
 
 error:
-	g_free(filename);
+	if (filename)
+		g_free(filename);
 	osync_context_report_osyncerror(ctx, error);
 	osync_trace(TRACE_EXIT_ERROR, "%s: %s", __func__, osync_error_print(&error));
 	osync_error_unref(&error);
