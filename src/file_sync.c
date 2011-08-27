@@ -662,9 +662,9 @@ osync_bool get_sync_info(OSyncPluginEnv *env, OSyncError **error)
 	osync_plugin_set_longname(plugin, "File Synchronization Plugin");
 	osync_plugin_set_description(plugin, "Plugin to synchronize files on the local filesystem");
 
-	osync_plugin_set_initialize(plugin, osync_filesync_initialize);
-	osync_plugin_set_finalize(plugin, osync_filesync_finalize);
-	osync_plugin_set_discover(plugin, osync_filesync_discover);
+	osync_plugin_set_initialize_func(plugin, osync_filesync_initialize);
+	osync_plugin_set_finalize_func(plugin, osync_filesync_finalize);
+	osync_plugin_set_discover_func(plugin, osync_filesync_discover);
 
 	if (!osync_plugin_env_register_plugin(env, plugin, error))
 		goto error;
