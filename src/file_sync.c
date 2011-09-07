@@ -614,7 +614,7 @@ error:
 	return NULL;
 }
 
-static void osync_filesync_finalize(void *data)
+static void osync_filesync_finalize(OSyncPlugin *plugin, void *data)
 {
 	OSyncFileEnv *env = data;
 
@@ -623,7 +623,7 @@ static void osync_filesync_finalize(void *data)
 
 /* Here we actually tell opensync which sinks are available. For this plugin, we
  * just report all objtype as available. Since the resource are configured like this. */
-static osync_bool osync_filesync_discover(OSyncPluginInfo *info, void *data, OSyncError **error)
+static osync_bool osync_filesync_discover(OSyncPlugin *plugin, OSyncPluginInfo *info, void *data, OSyncError **error)
 {
 	osync_trace(TRACE_ENTRY, "%s(%p, %p, %p)", __func__, data, info, error);
 
